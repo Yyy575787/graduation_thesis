@@ -1,0 +1,47 @@
+# 系统与编辑器
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# Office 临时/锁文件
+~$*
+*.tmp
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# LaTeX 编译中间产物
+*.aux
+*.bbl
+*.blg
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.xdv
+*.nav
+*.snm
+
+# 构建与实验产物
+build/
+dist/
+out/
+*.log
+
+# 原始实验数据（体积大，按需单独归档）
+data/raw/
+*.bag
+*.h5
+*.pcd
