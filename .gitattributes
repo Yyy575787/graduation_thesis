@@ -1,0 +1,7 @@
+# 统一换行符，避免在 Ubuntu 上运行 Windows 写出的脚本时报 \r 错误
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+*.md text
+*.csv text
+*.bib text
