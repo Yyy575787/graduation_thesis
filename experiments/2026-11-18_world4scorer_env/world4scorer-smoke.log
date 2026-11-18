@@ -1,0 +1,8 @@
+No broken requirements found.
+imports: DrivoRModel DrivoRAgent PoolDumpModule
+navsim: $W4S_ROOT/navsim/__init__.py
+nuplan: $W4S_ROOT/nuplan-devkit/nuplan/__init__.py
+torch/torchvision: 2.12.0+cu130 0.27.0+cu130
+loading  timm/vit_small_patch14_reg4_dinov2.lvd142m
+[ok] parameters 35,520,926 (expected 35,520,926)
+ALL OK

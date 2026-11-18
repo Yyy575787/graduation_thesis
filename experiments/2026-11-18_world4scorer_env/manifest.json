@@ -1,0 +1,30 @@
+{
+  "run_id": "2026-11-18_world4scorer_env",
+  "date": "2026-11-18",
+  "timezone": "Asia/Shanghai",
+  "stage": "environment_preflight",
+  "status": "PASS_ENVIRONMENT_ONLY",
+  "world4scorer_commit": "7814310e0bd65c6e21f06b81eedfec2ac9a06aa9",
+  "python": "3.10.12",
+  "torch": "2.12.0+cu130",
+  "torchvision": "0.27.0+cu130",
+  "cuda_runtime": "13.0",
+  "nvidia_driver": "595.99.02",
+  "gpu": "NVIDIA GeForce RTX 5060 Laptop GPU",
+  "gpu_memory_mib": 8151,
+  "compute_capability": "12.0",
+  "model_parameters_expected": 35520926,
+  "model_parameters_observed": 35520926,
+  "dataset_split": null,
+  "checkpoint_sha256": null,
+  "expected_tokens": null,
+  "scored_tokens": null,
+  "e0_executed": false,
+  "artifacts": {
+    "environment": "env.txt",
+    "dependencies": "requirements-frozen.txt",
+    "recheck": "command.sh",
+    "gpu_log": "gpu-smoke.log",
+    "world4scorer_log": "world4scorer-smoke.log"
+  }
+}
