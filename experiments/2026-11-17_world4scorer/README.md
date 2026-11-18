@@ -8,6 +8,8 @@
 2. 获取 NAVSIM/OpenScene 对应日志、相机数据和 nuPlan 地图。先核验少量样本的相机时间对齐、地图加载、评分缓存 token 对应。正式阶段扩到固定的 `navtest` 清单。
 3. 获取发布的 `w4s_navsim_ep23.ckpt` 和对应 DINOv2 权重，按作者 SHA-256 核对。先只运行固定的少量开发样本，确认小批量推理、候选坐标和所选编号能导出，CPU 评分能读入。记录实际可用批量与显存。
 
+资源预检在拟运行的机器上完成。选一份有代表性的分片，记录下载字节数及耗时，核对权限、压缩包与解压后的体积，估算原数据、临时文件、评分缓存与候选产物并存所需的空间。小样本用同一 token 清单分段计时，至少记录 NAVSIM 评分缓存生成、GPU 候选推理、CPU 候选推演与评分、输出体积及峰值显存。将每阶段日志和估算写入本次运行记录。
+
 [作者环境、下载和权重校验](https://github.com/World4Scorer/World4Scorer#model-zoo) · [NAVSIM v2.2](https://github.com/autonomousvision/navsim/tree/v2.2)
 
 ## 2. E1 正式复现发布基线
@@ -20,7 +22,9 @@
 
 作者脚本会重建同一输出目录中的评分子目录。每次正式运行使用新的路径，需续跑时按各自工具的机制和实验日志操作。另为调试集合保留独立运行文件，所有指标注明分母。
 
-[单阶段 NAVSIM 复现流程](https://github.com/World4Scorer/World4Scorer#4-evaluation-navsim-v1-and-navsim-v2)
+11 月 30 日以全量为目标。若下载或批跑推迟，保存已完成的 token 范围、有效数、输出及首个阻塞。准备好 `navtrain` 开发样本后即可启动 E2。作者在单张 24 GB A30 上报告的约 1.3 小时是推理参考，分段实测用于估算本项目的完整耗时。
+
+[单阶段 NAVSIM 复现流程](https://github.com/World4Scorer/World4Scorer#4-evaluation-navsim-v1-and-navsim-v2) · [作者计算开销](https://arxiv.org/html/2609.36438v1#A1.SS2)
 
 ## 3. E2 诊断产物
 
