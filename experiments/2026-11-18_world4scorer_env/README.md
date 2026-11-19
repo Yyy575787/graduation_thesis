@@ -30,3 +30,15 @@ bash experiments/2026-11-18_world4scorer_env/command.sh
 - [GPU 原始输出](gpu-smoke.log) · [World4Scorer 检查输出](world4scorer-smoke.log)（源码绝对路径替换为 `$W4S_ROOT`）
 
 **未执行**：未下载发布权重或 NAVSIM 数据，未校验权重文件、未加载 checkpoint、未运行真实样本推理、候选导出、NAVSIM v2.2 评分或 E0。没有评测 token 或成绩，不计入任何基线结果。
+
+已创建独立的 World4Scorer 推理环境：`/home/ybw2204/.venvs/world4scorer`。PyTorch 已在本机 RTX 5060 Laptop GPU 上完成实际运算：在 cuda:0 上执行了 128×128 矩阵乘法，同步后逐元素核对，结果全部为预期的 128.0。
+- 环境：Python 3.10.12，PyTorch 2.12.0+cu130，CUDA 运行时 13.0。
+- 源码：已固定 World4Scorer 提交 7814310，并安装随附的 nuPlan devkit。
+- 兼容性：`pip check` 通过，模型、Agent 和候选导出模块均可导入。作者的无权重构建检查通过，参数量为 35,520,926，与预期一致。
+使用时隔离 ROS 和用户级 Python 路径：
+
+```bash
+source /home/ybw2204/.venvs/world4scorer/bin/activate
+unset PYTHONPATH
+export PYTHONNOUSERSITE=1
+```

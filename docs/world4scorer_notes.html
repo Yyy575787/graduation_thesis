@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>World4Scorer 笔记架构图</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      color: #0f172a;
+    }
+    .math {
+      font-family: 'Cambria Math', 'Times New Roman', ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    .card-elevated {
+      box-shadow: 0 4px 20px -4px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+    }
+    .arrow-right {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body class="min-h-screen p-4 sm:p-6 lg:p-8">
+  <main class="max-w-6xl mx-auto space-y-5">
+
+    <!-- 顶部标题：严格对应笔记抬头 -->
+    <header class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 card-elevated">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <span class="inline-block px-3 py-1 rounded-full text-xs font-bold tracking-wide bg-indigo-600 text-white">
+            World4Scorer
+          </span>
+          <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2.5 tracking-tight">
+            “以决策为中心”的“世界模型”
+          </h1>
+        </div>
+        <div class="px-3.5 py-2 rounded-xl bg-rose-50 border border-rose-200/80 text-xs sm:text-sm text-rose-800 font-medium self-start sm:self-center">
+          <span class="font-bold">非</span>完整的未来图像或像素级演化
+        </div>
+      </div>
+      <div class="mt-3 pt-3 border-t border-slate-100 flex items-center gap-2 text-sm text-slate-700">
+        <span class="text-indigo-600 font-bold text-base leading-none">&#8627;</span>
+        <span>潜在状态承载的是<strong class="text-indigo-700 font-semibold">候选轨迹的结果信息</strong></span>
+      </div>
+    </header>
+
+    <!-- 第一板块：主架构前向流（笔记上半部分） -->
+    <section class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 card-elevated space-y-5">
+      <div class="flex items-center gap-2">
+        <span class="w-1.5 h-5 rounded-full bg-indigo-600"></span>
+        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700">一、核心前向架构与预测器内部结构</h2>
+      </div>
+
+      <!-- 主流水线：横向流程 -->
+      <div class="flex flex-col lg:flex-row items-stretch lg:items-center gap-2.5">
+        <!-- 4-view images -->
+        <div class="flex-1 bg-sky-50/70 border border-sky-200 rounded-xl p-3.5">
+          <div class="text-[11px] font-bold text-sky-700 uppercase">输入</div>
+          <div class="font-bold text-sm text-slate-900 mt-0.5">4-view Images</div>
+          <div class="mt-2 text-xs text-sky-900 bg-white/80 border border-sky-100 rounded-lg px-2.5 py-1.5">
+            经 <span class="font-semibold">DINOv2</span> 编码
+          </div>
+        </div>
+
+        <div class="arrow-right py-1 lg:py-0">
+          <svg class="w-5 h-5 rotate-90 lg:rotate-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </div>
+
+        <!-- Scenario Token s_t -->
+        <div class="flex-1 bg-sky-50 border border-sky-300 rounded-xl p-3.5">
+          <div class="text-[11px] font-bold text-sky-700 uppercase">场景表征</div>
+          <div class="font-bold text-sm text-slate-900 mt-0.5">Scenario Token <span class="math text-sky-700">s<sub>t</sub></span></div>
+          <div class="mt-2 text-xs text-slate-600">
+            4 视角相机编码输出的 <span class="font-semibold text-slate-900">15,744</span> 个图像特征
+          </div>
+        </div>
+
+        <div class="arrow-right py-1 lg:py-0">
+          <svg class="w-5 h-5 rotate-90 lg:rotate-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </div>
+
+        <!-- Trajectory Generator -->
+        <div class="flex-1 bg-slate-50 border border-slate-300 rounded-xl p-3.5">
+          <div class="text-[11px] font-bold text-slate-500 uppercase">候选生成</div>
+          <div class="font-bold text-sm text-slate-900 mt-0.5">Trajectory Generator</div>
+          <div class="mt-2 text-xs text-slate-700">
+            输出 <span class="math font-semibold">N = 64</span> 候选轨迹<br/>
+            <span class="math font-semibold text-slate-900">&tau;<sub>t,i</sub> (i = 1, 2, &hellip;, 64)</span>
+          </div>
+        </div>
+
+        <div class="arrow-right py-1 lg:py-0">
+          <svg class="w-5 h-5 rotate-90 lg:rotate-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
+        </div>
+
+        <!-- Action Encoder φ -->
+        <div class="flex-1 bg-indigo-50/70 border border-indigo-200 rounded-xl p-3.5">
+          <div class="flex items-center justify-between gap-1">
+            <span class="text-[11px] font-bold text-indigo-700 uppercase">动作编码</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 math">sg</span>
+          </div>
+          <div class="font-bold text-sm text-slate-900 mt-0.5">Action Encoder <span class="math text-indigo-700">&phi;</span></div>
+          <div class="mt-2 text-xs text-slate-700 math">
+            q<sub>t,i</sub> = &phi;(sg[&tau;<sub>t,i</sub>])<br/>
+            Q<sub>t</sub> shape: (N, 256)
+          </div>
+        </div>
+      </div>
+
+      <!-- sg 停止梯度注释条 + query token 说明 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div class="bg-rose-50/80 border border-rose-200 rounded-xl p-3.5 text-xs leading-relaxed">
+          <div class="font-bold text-rose-800 mb-1 flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px] math">sg</span>
+            stop-gradient（停止梯度）
+          </div>
+          <p class="text-slate-700">
+            在 PyTorch 中对张量调用 <code class="px-1 py-0.5 rounded bg-white border border-rose-200 text-rose-700 font-mono">.detach()</code>；截断 <span class="math font-semibold">L<sub>score</sub></span> 到 <span class="math font-semibold">&phi;</span> 输入端，使生成器<strong class="text-rose-900">只听 <span class="math">L<sub>WTA</sub></span></strong>。
+          </p>
+        </div>
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs leading-relaxed">
+          <div class="font-bold text-slate-800 mb-1">Query Token 汇总与输入</div>
+          <p class="text-slate-700">
+            <span class="math font-semibold">q<sub>t,i</sub> = &phi;(sg[&tau;<sub>t,i</sub>])</span>，汇总为矩阵
+            <span class="math font-semibold">Q<sub>t</sub> = [q<sub>t,1</sub>, &hellip;, q<sub>t,N</sub>]</span>（shape <span class="math">(N, 256)</span>），连同 <span class="math font-semibold">s<sub>t</sub></span> 一同送入 <span class="math font-semibold">P</span>。
+          </p>
+        </div>
+      </div>
+
+      <!-- Latent World Model P（4 层）内部结构 -->
+      <div class="bg-indigo-50/50 border-2 border-indigo-200 rounded-2xl p-4 sm:p-5 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2.5">
+            <span class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white text-xs font-bold">4 层</span>
+            <h3 class="text-base font-bold text-slate-900">Latent World Model <span class="math text-indigo-700">P</span></h3>
+          </div>
+          <span class="text-xs font-medium text-indigo-800 bg-white px-3 py-1 rounded-full border border-indigo-200">
+            P 内部模块结构
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="bg-white border border-indigo-100 rounded-xl p-3.5 shadow-sm">
+            <div class="text-xs font-bold text-indigo-700">① Self-Attention</div>
+            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+              <span class="math font-semibold text-slate-800">Q, K, V</span> 来自 <span class="math">&tau;<sub>i</sub>, &tau;<sub>j</sub></span>；用 <span class="math">&tau;<sub>i</sub></span> 和所有 <span class="math">&tau;<sub>j</sub></span> 做注意力，实现<strong class="text-slate-800">横向比较学习</strong>。
+            </p>
+          </div>
+          <div class="bg-white border border-indigo-100 rounded-xl p-3.5 shadow-sm">
+            <div class="text-xs font-bold text-indigo-700">② Cross-Attention</div>
+            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+              <span class="math font-semibold text-slate-800">Q</span> 来自 <span class="math">&tau;<sub>i</sub></span>，<span class="math font-semibold text-slate-800">K, V</span> 来自 <span class="math">s<sub>t</sub></span>；<span class="math">&tau;<sub>i</sub></span> 将自身特征放到 <span class="math">s<sub>t</sub></span> 中做<strong class="text-slate-800">预测学习</strong>。
+            </p>
+          </div>
+          <div class="bg-white border border-indigo-100 rounded-xl p-3.5 shadow-sm">
+            <div class="text-xs font-bold text-indigo-700">③ FFN（Feed-Forward Network）</div>
+            <p class="text-xs text-slate-600 mt-1.5 leading-relaxed">
+              两层 MLP：<span class="math font-semibold text-slate-800 bg-indigo-50 px-1.5 py-0.5 rounded">256 &rarr; 1024 &rarr; 256</span>，对融合特征做非线性提炼。
+            </p>
+          </div>
+        </div>
+
+        <!-- 输出归一化得 Z_t -->
+        <div class="bg-white border border-indigo-200 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs sm:text-sm">
+          <div>
+            经<strong class="text-slate-900">输出归一化</strong>得：<span class="math font-bold text-indigo-700">Z<sub>t</sub> = P(Q<sub>t</sub>, s<sub>t</sub>)</span>，其中 <span class="math font-semibold">Z<sub>t</sub></span> 第 <span class="math">i</span> 行 <span class="math font-bold text-indigo-700">z<sub>t,i</sub></span> 为候选轨迹 <span class="math">i</span> 的<strong class="text-slate-900">预测状态</strong>
+          </div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-indigo-50 text-indigo-800 text-xs font-semibold shrink-0">
+            融合：场景环境 + 同池竞争关系
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第二板块：评分头与排序得分（笔记中部） -->
+    <section class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 card-elevated space-y-4">
+      <div class="flex items-center gap-2">
+        <span class="w-1.5 h-5 rounded-full bg-emerald-600"></span>
+        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700">二、评分读取与对数域排序得分</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+        <!-- 左侧：P -> Z_t -> Score Heads H <- e_t -->
+        <div class="lg:col-span-5 bg-emerald-50/60 border border-emerald-200 rounded-xl p-4 flex flex-col justify-between space-y-3">
+          <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
+            <span class="px-2.5 py-1 rounded-lg bg-indigo-100 text-indigo-800 math">P &rarr; Z<sub>t</sub></span>
+            <span class="text-slate-400">&rarr;</span>
+            <span class="px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold">Score Heads H</span>
+            <span class="text-slate-400">&larr;</span>
+            <span class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-900 math">e<sub>t</sub> (自车状态)</span>
+          </div>
+          <div class="bg-white border border-emerald-100 rounded-lg p-3 text-xs sm:text-sm text-slate-800 math space-y-1">
+            <div>&ell;<sub>t,i</sub> = H(z<sub>t,i</sub> + e<sub>t</sub>)</div>
+            <div>令 p<sub>t,i,m</sub> = &sigma;(&ell;<sub>t,i,m</sub>)</div>
+          </div>
+        </div>
+
+        <!-- 右侧：G / A 分组与排序得分公式 -->
+        <div class="lg:col-span-7 bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col justify-between space-y-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+            <div class="bg-white border border-slate-200 rounded-lg p-2.5">
+              <span class="font-bold text-rose-700">乘性组 <span class="math">G</span>：</span>
+              <span class="math text-slate-800 font-semibold">{NC, DAC, DDC}</span>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-lg p-2.5">
+              <span class="font-bold text-emerald-700">加性组 <span class="math">A</span>：</span>
+              <span class="math text-slate-800 font-semibold">{TTC, EP, C}</span>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 text-slate-100 rounded-xl p-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <div class="text-[11px] text-slate-400 font-medium">排序得分</div>
+              <div class="math text-sm sm:text-base font-semibold text-emerald-300 mt-0.5">
+                J&#770;<sub>t,i</sub> = &Sigma;<sub>m&isin;G</sub> &alpha;<sub>m</sub> log p<sub>t,i,m</sub> + log( &Sigma;<sub>m&isin;A</sub> &beta;<sub>m</sub> p<sub>t,i,m</sub> )
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-[11px] text-amber-300 shrink-0 math">
+              &alpha;<sub>m</sub>, &beta;<sub>m</sub> 为各项权重
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 第三板块：双路训练监督（更新自新版手写笔记底部） -->
+    <section class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 card-elevated space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-5 rounded-full bg-amber-500"></span>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700">三、互补训练监督：结果标签监督 + 以轨迹为条件的 JEPA</h2>
+        </div>
+        <div class="text-xs font-medium bg-slate-100 text-slate-700 px-3 py-1 rounded-full">
+          Each train scene supplies: <span class="font-bold text-amber-700">label &rarr; 80 条</span> · <span class="font-bold text-violet-700">future target &rarr; exec one</span>
+        </div>
+      </div>
+
+      <!-- 上半对比桥：缺乏 vs 具有 未来观测 -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+        <!-- 左侧：80 条候选轨迹的结果标签监督 -->
+        <div class="lg:col-span-6 bg-amber-50/60 border-2 border-amber-200 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="font-bold text-sm text-slate-900">生成候选轨迹（64 条） + 轨迹库候选轨迹（16 条）</div>
+              <div class="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
+                &rarr; 缺乏未来观测
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-emerald-100 border border-emerald-200 text-xs font-bold text-emerald-800 shrink-0">
+              &uarr; 监督：结果标签 y<sub>i</sub>
+            </span>
+          </div>
+
+          <div class="bg-white border border-amber-200/80 rounded-xl p-3.5 space-y-2">
+            <div class="text-[11px] font-bold text-amber-800 uppercase">结果损失函数（式 5）</div>
+            <div class="math text-xs sm:text-sm font-semibold text-slate-900 bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+              L<sub>out</sub> = L<sub>score</sub> + &lambda;<sub>bank</sub> L<sub>bank</sub> = &Sigma;<sub>i</sub> w<sub>i</sub> &ell;<sub>out</sub>(H(z<sub>i</sub> + e), y<sub>i</sub>)
+            </div>
+            <p class="text-xs text-slate-700">
+              <span class="math font-semibold">y<sub>i</sub></span> 要求模型在 <span class="math font-semibold text-rose-700">G</span>（安全硬约束）和 <span class="math font-semibold text-emerald-700">A</span>（进度/舒适度）上做出区分。
+            </p>
+          </div>
+        </div>
+
+        <!-- 右侧：1 条实际运行轨迹的 JEPA 视觉预测 -->
+        <div class="lg:col-span-6 bg-violet-50/60 border-2 border-violet-200 rounded-2xl p-4 flex flex-col justify-between space-y-3">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <div class="font-bold text-sm text-slate-900">实际运行轨迹（1 条 · <span class="math text-violet-700">&tau;<sub>t</sub><sup>exec</sup></span>）</div>
+              <div class="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-violet-800 bg-violet-100 border border-violet-200 px-2 py-0.5 rounded-md">
+                &larr; 具有未来观测 (<span class="math">o<sub>t+2s</sub></span>)
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-lg bg-violet-600 text-white text-xs font-bold shrink-0">
+              以轨迹为条件的 JEPA
+            </span>
+          </div>
+
+          <div class="bg-white border border-violet-200/80 rounded-xl p-3.5 space-y-2.5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs math">
+              <div class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900">
+                z<sub>t</sub><sup>exec</sup> = P([&phi;(&tau;<sub>t</sub><sup>exec</sup>)], <span class="text-rose-600 font-bold">sg[s<sub>t</sub>]</span>)
+              </div>
+              <div class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-900">
+                u<sub>t</sub><sup>fut</sup> = f<sub>DINO</sub>(o<sub>t+2s</sub>)
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 text-xs">
+              <span class="px-2 py-0.5 rounded bg-violet-100 text-violet-900 font-semibold">线性层 Visual Readout Head <span class="math font-bold">g</span></span>
+              <span class="text-slate-500">&rarr;</span>
+              <span class="math font-semibold text-slate-900">L<sub>fut</sub> = (1/M) &Sigma;<sub>n=1..M</sub> [ 1 &minus; sim<sub>cos</sub>(g(z<sub>n</sub><sup>exec</sup>), u<sub>n</sub><sup>fut</sup>) ]</span>
+            </div>
+
+            <div class="px-3 py-1.5 rounded-lg bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-900">
+              梯度更新范围：只更新 <span class="math">&phi;, P, g</span>，<strong>不更新 <span class="math">s<sub>t</sub></span>（Scenario token）</strong>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- 第四板块：分批单独调用与梯度流向汇总 -->
+    <section class="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 card-elevated space-y-5">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-5 rounded-full bg-rose-600"></span>
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-700">四、分批单独调用机制（Separate Calls）与梯度流向汇总</h2>
+        </div>
+        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+          共用一套 &phi; &rarr; P &rarr; H 权重，但三组输入互不混入同一 Self-Attention
+        </span>
+      </div>
+
+      <!-- 三次独立调用卡片 -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-800">第 1 次调用 · 64 条生成候选</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-100 text-amber-900">Q<sub>t</sub><sup>gen</sup> (64,256)</span>
+          </div>
+          <p class="text-xs text-slate-700 leading-relaxed">
+            生成器吐出 <span class="math font-semibold">&tau;<sub>t,1&hellip;64</sub></span> &rarr; 经 <span class="math font-semibold text-rose-600">sg (.detach())</span> 进 <span class="math font-semibold">&phi;</span> 编码成 <span class="math">Q<sub>t</sub><sup>gen</sup></span> &rarr; 送入 <span class="math font-semibold">P</span>（64 条内部互相 Self-Attention，并与 <span class="math">s<sub>t</sub></span> 做 Cross-Attention）&rarr; 输出 <span class="math font-semibold">Z<sub>t</sub><sup>gen</sup> + e<sub>t</sub></span> 进评分头 <span class="math font-semibold">H</span>。
+          </p>
+        </div>
+
+        <div class="bg-orange-50/50 border border-orange-200 rounded-xl p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-orange-800">第 2 次调用 · 16 条轨迹库候选</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-orange-100 text-orange-900">Q<sub>t</sub><sup>bank</sup> (16,256)</span>
+          </div>
+          <p class="text-xs text-slate-700 leading-relaxed">
+            从当前场景轨迹库随机抽 16 条扰动轨迹 &rarr; 过同一个 <span class="math font-semibold">&phi;</span> 编码成 <span class="math">Q<sub>t</sub><sup>bank</sup></span> &rarr; <strong>单独</strong>送进同一个 <span class="math font-semibold">P</span>（只在 16 条内部 Self-Attention，不干扰生成候选）&rarr; 输出 <span class="math font-semibold">Z<sub>t</sub><sup>bank</sup> + e<sub>t</sub></span> 进同一个 <span class="math font-semibold">H</span>。
+          </p>
+        </div>
+
+        <div class="bg-violet-50/50 border border-violet-200 rounded-xl p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-violet-800">第 3 次调用 · 1 条实际执行轨迹</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-violet-100 text-violet-900">z<sub>t</sub><sup>exec</sup> (1,256)</span>
+          </div>
+          <p class="text-xs text-slate-700 leading-relaxed">
+            日志人类真值轨迹 <span class="math font-semibold">&tau;<sub>t</sub><sup>exec</sup></span> 过 <span class="math font-semibold">&phi;</span> &rarr; <strong>单独</strong>送进 <span class="math font-semibold">P</span>（且对 <span class="math font-semibold text-rose-600">s<sub>t</sub> 加 sg</span>）&rarr; 输出 <span class="math font-semibold">z<sub>t</sub><sup>exec</sup></span> 接线性视觉读出头 <span class="math font-semibold">g</span> 对齐 +2s 特征。
+          </p>
+        </div>
+      </div>
+
+      <!-- 梯度流向表 -->
+      <div class="overflow-x-auto border border-slate-200 rounded-xl">
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+              <th class="py-2.5 px-3 font-bold">损失项</th>
+              <th class="py-2.5 px-3 font-bold">监督对象</th>
+              <th class="py-2.5 px-2.5 font-bold text-center">DINOv2 (LoRA)</th>
+              <th class="py-2.5 px-2.5 font-bold text-center">轨迹生成器</th>
+              <th class="py-2.5 px-2.5 font-bold text-center">编码器 &phi;</th>
+              <th class="py-2.5 px-2.5 font-bold text-center">P (除 W<sub>Q</sub>,W<sub>K</sub>)</th>
+              <th class="py-2.5 px-2.5 font-bold text-center">P 自注意力 W<sub>Q</sub>,W<sub>K</sub></th>
+              <th class="py-2.5 px-2.5 font-bold text-center">评分头 H</th>
+              <th class="py-2.5 px-2.5 font-bold text-center">读出头 g</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50/70">
+              <td class="py-2.5 px-3 font-bold text-slate-900 math">L<sub>WTA</sub></td>
+              <td class="py-2.5 px-3 text-slate-600">最接近人类的 1 条生成轨迹</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-semibold">&#10004; 更新</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-bold bg-emerald-50/70">&#10004; 唯一更新</td>
+              <td class="py-2.5 px-2.5 text-center text-slate-400">&#10006;</td>
+              <td class="py-2.5 px-2.5 text-center text-slate-400">&#10006;</td>
+              <td class="py-2.5 px-2.5 text-center text-slate-400">&#10006;</td>
+              <td class="py-2.5 px-2.5 text-center text-slate-400">&#10006;</td>
+              <td class="py-2.5 px-2.5 text-center text-slate-400">&#10006;</td>
+            </tr>
+            <tr class="hover:bg-slate-50/70">
+              <td class="py-2.5 px-3 font-bold text-amber-800 math">L<sub>score</sub></td>
+              <td class="py-2.5 px-3 text-slate-600">64 条生成候选结果标签</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-semibold">&#10004; 更新</td>
+              <td class="py-2.5 px-2.5 text-center text-rose-600 font-medium">&#10006; 被 sg 截断</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-semibold">&#10004; 更新</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-semibold">&#10004; 更新</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-semibold">&#10004; 更新</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-semibold">&#10004; 更新</td>
+              <td class="py-2.5 px-2.5 text-center text-slate-400">&#10006;</td>
+            </tr>
+            <tr class="hover:bg-slate-50/70">
+              <td class="py-2.5 px-3 font-bold text-orange-800 math">L<sub>bank</sub> (&times;0.5)</td>
+              <td class="py-2.5 px-3 text-slate-600">16 条轨迹库结果标签</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-semibold">&#10004; 更新</td>
+              <td class="py-2.5 px-2.5 text-center text-slate-400">&#10006; 无关</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-semibold">&#10004; 更新</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-semibold">&#10004; 更新</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-semibold">&#10004; 更新</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-semibold">&#10004; 更新</td>
+              <td class="py-2.5 px-2.5 text-center text-slate-400">&#10006;</td>
+            </tr>
+            <tr class="hover:bg-slate-50/70">
+              <td class="py-2.5 px-3 font-bold text-violet-800 math">L<sub>fut</sub> (&times;1.0)</td>
+              <td class="py-2.5 px-3 text-slate-600">1 条执行轨迹 +2s 特征</td>
+              <td class="py-2.5 px-2.5 text-center text-rose-600 font-medium">&#10006; 被 sg[s<sub>t</sub>] 截断</td>
+              <td class="py-2.5 px-2.5 text-center text-slate-400">&#10006; 无关</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-semibold">&#10004; 更新</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-semibold">&#10004; 更新</td>
+              <td class="py-2.5 px-2.5 text-center text-rose-600 font-medium">&#10006; 梯度为 0 (式 10)</td>
+              <td class="py-2.5 px-2.5 text-center text-slate-400">&#10006;</td>
+              <td class="py-2.5 px-2.5 text-center text-emerald-700 font-bold bg-violet-50/70">&#10004; 更新</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 总损失汇总 -->
+      <div class="bg-slate-900 text-slate-100 rounded-xl px-4 py-2.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
+        <span class="font-semibold text-slate-300">联合训练总损失（式 7）：</span>
+        <span class="math text-sm font-semibold text-amber-300">
+          L = L<sub>WTA</sub> + L<sub>score</sub> + 1.0 &middot; L<sub>fut</sub> + 0.5 &middot; L<sub>bank</sub>
+        </span>
+      </div>
+    </section>
+
+  </main>
+</body>
+</html>
